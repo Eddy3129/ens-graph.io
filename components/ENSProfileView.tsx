@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink, History, Twitter, Github, ArrowLeft } from 'lucide-react'
@@ -32,17 +34,15 @@ export default function ENSProfileView({ profile }: ENSProfileViewProps) {
             {/* Avatar + ETH Balance */}
             <div className="flex-shrink-0">
               {profile.avatar && profile.avatar.startsWith('http') ? (
-                <div className="relative w-16 h-16">
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700">
                   <Image
                     src={profile.avatar}
                     alt={profile.name}
                     fill
-                    className="rounded-lg object-cover border border-gray-200 dark:border-slate-700"
+                    className="object-cover"
                     sizes="64px"
                     priority
-                    onError={() => {
-                      // Fallback handled by showing gradient
-                    }}
+                    unoptimized
                   />
                 </div>
               ) : (

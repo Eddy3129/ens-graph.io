@@ -1,0 +1,17 @@
+feat: add interactive ENS graph visualization with Cytoscape
+
+Add graph visualization feature for exploring ENS networks:
+- New /graph page for creating custom network visualizations
+- Interactive Cytoscape.js graph with hover effects and navigation
+- Avatar proxy API (/api/avatar) to handle CORS
+- Global navbar with dark mode toggle
+- Sample graph data with popular ENS names
+
+Technical changes:
+- Replace react-force-graph-2d with cytoscape + react-cytoscapejs
+- Non-animated layout to prevent renderer lifecycle errors
+- Class-based hover states for stability
+- Proper component cleanup to fix "Cannot read properties of null" errors
+
+Components: ForceGraphView, CytoscapeGraph, Navbar
+Types: GraphNode, GraphLink, GraphData

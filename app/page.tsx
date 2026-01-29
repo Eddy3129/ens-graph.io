@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { isValidENS } from '@/lib/ens'
 import { Search } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
 
 // TypeWriter effect component
@@ -148,24 +147,6 @@ export default function HomePage() {
                   </span>
                 </button>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Coming Soon */}
-        <div className="text-center">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-            Coming Soon
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
-            <Link
-              href="/graph"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors duration-200"
-            >
-              Social Graph
-            </Link>
-            <div className="px-4 py-2 bg-gray-200 dark:bg-slate-800 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300">
-              Edit Connections
             </div>
           </div>
         </div>

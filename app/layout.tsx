@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
+import Navbar from '@/components/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,15 +15,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900`}>
-        <Providers>{children}</Providers>
+      <body
+        className={`${inter.className} bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900`}
+      >
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   )
