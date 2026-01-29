@@ -1,6 +1,7 @@
 import Image from 'next/image'
-import { ExternalLink, Wallet, History, Twitter, Github } from 'lucide-react'
-import { formatAddress, formatDate, formatUSD } from '@/lib/ens'
+import Link from 'next/link'
+import { ExternalLink, History, Twitter, Github, ArrowLeft } from 'lucide-react'
+import { formatAddress } from '@/lib/ens'
 import type { ENSProfile } from '@/types/ens'
 
 interface ENSProfileViewProps {
@@ -8,217 +9,192 @@ interface ENSProfileViewProps {
 }
 
 export default function ENSProfileView({ profile }: ENSProfileViewProps) {
-  const socialLinks = [
-    profile.twitter && { name: 'Twitter', value: profile.twitter, url: `https://twitter.com/${profile.twitter}`, icon: Twitter },
-    profile.github && { name: 'GitHub', value: profile.github, url: `https://github.com/${profile.github}`, icon: Github },
-    profile.discord && { name: 'Discord', value: profile.discord },
-    profile.telegram && { name: 'Telegram', value: profile.telegram, url: `https://t.me/${profile.telegram}` },
-  ].filter(Boolean)
-
-  const hasAddresses = profile.btc || profile.ltc || profile.doge
-  const portfolioValue = profile.tokens.reduce((acc, t) => acc + (t.valueUsd || 0), 0)
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 py-12">
-        {/* Header - Profile Info + Socials Side by Side */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 sm:p-8 mb-6">
-          <div className="flex flex-col sm:flex-row gap-8">
-            {/* Avatar + Name + Address */}
-            <div className="flex gap-4">
-              {profile.avatar ? (
-                <div className="relative w-24 h-24 flex-shrink-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Top Navigation */}
+      <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link
+            href="/"
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </Link>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{profile.name}</h1>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Profile Header - Compact */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-4 mb-4">
+          <div className="flex items-start gap-4">
+            {/* Avatar + ETH Balance */}
+            <div className="flex-shrink-0">
+              {profile.avatar && profile.avatar.startsWith('http') ? (
+                <div className="relative w-16 h-16">
                   <Image
                     src={profile.avatar}
                     alt={profile.name}
                     fill
-                    className="rounded-full object-cover border-4 border-blue-100 dark:border-blue-900/30"
-                    sizes="96px"
+                    className="rounded-lg object-cover border border-gray-200 dark:border-slate-700"
+                    sizes="64px"
                     priority
+                    onError={() => {
+                      // Fallback handled by showing gradient
+                    }}
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center flex-shrink-0 border-4 border-blue-100 dark:border-blue-900/30">
-                  <span className="text-3xl font-bold text-white">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center border border-gray-200 dark:border-slate-700">
+                  <span className="text-xl font-bold text-white">
                     {profile.name[0].toUpperCase()}
                   </span>
                 </div>
               )}
-
-              <div className="flex-1 min-w-0">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 break-all">
-                  {profile.name}
-                </h1>
-
-                {profile.address && (
-                  <a
-                    href={`https://etherscan.io/address/${profile.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:underline break-all flex items-center gap-1 group"
-                  >
-                    {formatAddress(profile.address)}
-                    <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                  </a>
-                )}
-
-                {profile.location && (
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                    📍 {profile.location}
-                  </p>
-                )}
-              </div>
             </div>
 
-            {/* Socials Column */}
-            {socialLinks.length > 0 && (
-              <div className="flex-shrink-0">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                  Connect
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {socialLinks.map((link: any) => (
-                    <a
-                      key={link.name}
-                      href={link.url || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 rounded-lg transition-all duration-200 group text-xs font-medium cursor-pointer"
-                    >
-                      {link.icon && <link.icon className="w-3.5 h-3.5" />}
-                      <span className="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                        {link.name}
-                      </span>
-                      {link.url && (
-                        <ExternalLink className="w-2.5 h-2.5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500" />
-                      )}
-                    </a>
-                  ))}
-                </div>
+            {/* Name, Address, ETH */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-2 mb-1">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  {profile.name}
+                </h2>
+                {profile.ethBalance && (
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    Balance: {parseFloat(profile.ethBalance).toFixed(2)} ETH
+                  </span>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Description */}
-          {profile.description && (
-            <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed border-t border-gray-200 dark:border-slate-700 pt-6 mt-6">
-              "{profile.description}"
-            </p>
-          )}
+              {profile.address && (
+                <a
+                  href={`https://etherscan.io/address/${profile.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 group"
+                >
+                  {formatAddress(profile.address)}
+                  <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                </a>
+              )}
+
+              {profile.description && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                  <span className="font-semibold">Bio:</span> {profile.description}
+                </p>
+              )}
+
+              {profile.location && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <span className="font-semibold">Location:</span> {profile.location}
+                </p>
+              )}
+            </div>
+
+            {/* Social Links - Vertical */}
+            <div className="flex flex-col gap-1 flex-shrink-0">
+              {profile.twitter && (
+                <a
+                  href={`https://twitter.com/${profile.twitter}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 hover:bg-blue-50 dark:hover:bg-slate-800 rounded transition-colors"
+                  title="Twitter"
+                >
+                  <Twitter className="w-4 h-4 text-blue-500" />
+                </a>
+              )}
+              {profile.github && (
+                <a
+                  href={`https://github.com/${profile.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded transition-colors"
+                  title="GitHub"
+                >
+                  <Github className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                </a>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Portfolio Overview */}
-        {(profile.ethBalance || profile.tokens.length > 0) && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 sm:p-8 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <Wallet className="w-4 h-4" />
-              Portfolio
+        {/* Transactions - Table Format */}
+        {profile.transactions.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+              <History className="w-4 h-4" />
+              Recent 50 Transactions
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {profile.ethBalance && (
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">
-                    ETH Balance
-                  </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {parseFloat(profile.ethBalance).toFixed(4)} ETH
-                  </p>
-                </div>
-              )}
-
-              {profile.tokens.length > 0 && (
-                <>
-                  <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-1">
-                      Tokens
-                    </p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      {profile.tokens.length}
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wide mb-1">
-                      Portfolio Value
-                    </p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      {formatUSD(portfolioValue)}
-                    </p>
-                  </div>
-                </>
-              )}
+            {/* Table Header */}
+            <div className="grid grid-cols-10 gap-2 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-slate-800 mb-1">
+              <div className="col-span-2">Tx Hash</div>
+              <div className="col-span-2">From</div>
+              <div className="col-span-2">To</div>
+              <div className="col-span-2">Amount</div>
+              <div className="col-span-2 text-right">Date</div>
             </div>
 
-            {/* Tokens List */}
-            {profile.tokens.length > 0 && (
-              <div>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {profile.tokens.map((token) => (
-                    <div
-                      key={token.contractAddress}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
-                    >
-                      <div>
-                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                          {token.symbol}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{token.name}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-mono text-xs text-gray-900 dark:text-gray-100">
-                          {parseFloat(token.balanceFormatted).toFixed(4)}
-                        </p>
-                        <p className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                          {formatUSD(token.valueUsd)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Transactions */}
-        {profile.transactions.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 sm:p-8 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
-              <History className="w-4 h-4" />
-              Recent Transactions
-            </h3>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            {/* Table Rows */}
+            <div className="space-y-0.5 max-h-96 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {profile.transactions.slice(0, 20).map((tx) => (
                 <a
                   key={tx.hash}
                   href={`https://etherscan.io/tx/${tx.hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer group"
+                  className="grid grid-cols-10 gap-2 px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-slate-800 rounded transition-colors cursor-pointer group"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded ${
-                        tx.isReceived
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                      }`}>
-                        {tx.isReceived ? '↓ In' : '↑ Out'}
-                      </span>
-                      <span className="font-mono text-xs text-blue-600 dark:text-blue-400 group-hover:underline break-all">
-                        {tx.hash.slice(0, 12)}...
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {formatDate(tx.timestamp)}
-                    </p>
+                  {/* Tx Hash */}
+                  <div
+                    className="col-span-2 font-mono text-blue-600 dark:text-blue-400 group-hover:underline truncate"
+                    title={tx.hash}
+                  >
+                    {tx.hash.slice(0, 6)}...{tx.hash.slice(-6)}
                   </div>
-                  <div className="text-right ml-4 flex-shrink-0">
-                    <p className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {tx.valueFormatted.startsWith('-') ? tx.valueFormatted : `+${tx.valueFormatted}`} ETH
-                    </p>
+
+                  {/* From Address */}
+                  <div
+                    className="col-span-2 font-mono text-gray-700 dark:text-gray-300 truncate"
+                    title={tx.from}
+                  >
+                    {tx.fromEns || `${tx.from.slice(0, 6)}...${tx.from.slice(-4)}`}
+                  </div>
+
+                  {/* To Address */}
+                  <div
+                    className="col-span-2 font-mono text-gray-700 dark:text-gray-300 truncate"
+                    title={tx.to || ''}
+                  >
+                    {tx.toEns || (tx.to ? `${tx.to.slice(0, 6)}...${tx.to.slice(-4)}` : '—')}
+                  </div>
+
+                  {/* Amount */}
+                  <div className="col-span-2 font-mono font-semibold">
+                    <span
+                      className={
+                        tx.isReceived
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }
+                    >
+                      {tx.isReceived ? '↓' : '↑'}{' '}
+                      {Math.abs(parseFloat(tx.valueFormatted)).toFixed(4)} ETH
+                    </span>
+                  </div>
+
+                  {/* Date */}
+                  <div className="col-span-2 text-gray-500 dark:text-gray-400 text-right text-xs whitespace-nowrap">
+                    {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true,
+                    })}
                   </div>
                 </a>
               ))}
@@ -226,69 +202,25 @@ export default function ENSProfileView({ profile }: ENSProfileViewProps) {
           </div>
         )}
 
-        {/* ENS Resolver */}
+        {/* Resolver Address - Minimal */}
         {profile.controller && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 sm:p-8 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
-              ENS Resolver
-            </h3>
-
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-3 mt-4">
             <a
               href={`https://etherscan.io/address/${profile.controller}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors group cursor-pointer inline-block w-full"
+              className="flex items-center justify-between gap-2 group hover:bg-gray-50 dark:hover:bg-slate-800 p-2 rounded transition-colors"
             >
-              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
-                Resolver Address
-              </p>
-              <p className="font-mono text-sm text-blue-600 dark:text-blue-400 group-hover:underline break-all flex items-center gap-2">
-                {profile.controller}
-                <ExternalLink className="w-3 h-3 flex-shrink-0" />
-              </p>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                  ENS Resolver Address
+                </p>
+                <p className="text-xs font-mono text-blue-600 dark:text-blue-400 group-hover:underline truncate">
+                  {profile.controller.slice(0, 10)}...{profile.controller.slice(-8)}
+                </p>
+              </div>
+              <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 flex-shrink-0" />
             </a>
-
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-              Note: ENS expiration dates require direct contract queries to the ENS Registrar (coming in a future update)
-            </p>
-          </div>
-        )}
-
-        {/* Crypto Addresses */}
-        {hasAddresses && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 sm:p-8">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
-              Crypto Addresses
-            </h3>
-
-            <div className="space-y-3">
-              {profile.btc && (
-                <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1">
-                    Bitcoin (BTC)
-                  </p>
-                  <p className="font-mono text-xs text-gray-700 dark:text-gray-300 break-all">{profile.btc}</p>
-                </div>
-              )}
-
-              {profile.ltc && (
-                <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1">
-                    Litecoin (LTC)
-                  </p>
-                  <p className="font-mono text-xs text-gray-700 dark:text-gray-300 break-all">{profile.ltc}</p>
-                </div>
-              )}
-
-              {profile.doge && (
-                <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1">
-                    Dogecoin (DOGE)
-                  </p>
-                  <p className="font-mono text-xs text-gray-700 dark:text-gray-300 break-all">{profile.doge}</p>
-                </div>
-              )}
-            </div>
           </div>
         )}
       </div>

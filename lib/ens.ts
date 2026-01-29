@@ -1,14 +1,11 @@
 import { normalize } from 'viem/ens'
 import { createPublicClient, http } from 'viem'
 import { mainnet } from 'viem/chains'
-import type { ENSProfile } from '@/types/ens'
 
 // Create a public client for ENS resolution
 const publicClient = createPublicClient({
   chain: mainnet,
-  transport: http(
-    process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://ethereum-rpc.publicnode.com'
-  ),
+  transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://ethereum-rpc.publicnode.com'),
 })
 
 /**
@@ -115,4 +112,39 @@ export async function getEnsRegistryData(name: string): Promise<{
       controller: null,
     }
   }
+}
+
+/**
+ * Batch resolve multiple addresses to ENS names
+ * Returns a map of address -> ENS name (or null if not found)
+ */
+export async function batchResolveAddresses(
+  addresses: `0x${string}`[]
+): Promise<Map<`0x${string}`, string | null>> {
+  const result = new Map<`0x${string}`, string | null>()
+
+  // Deduplicate addresses
+  const uniqueAddresses = Array.from(new Set(addresses))
+
+  try {
+    // Resolve all in parallel
+    const ensNames = await Promise.all(
+      uniqueAddresses.map(async (address) => {
+        try {
+          const name = await publicClient.getEnsName({ address })
+          return [address, name] as const
+        } catch {
+          return [address, null] as const
+        }
+      })
+    )
+
+    ensNames.forEach(([address, name]) => {
+      result.set(address, name)
+    })
+  } catch (error) {
+    console.error('Error batch resolving addresses:', error)
+  }
+
+  return result
 }

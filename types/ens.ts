@@ -49,7 +49,9 @@ export interface TokenBalance {
 export interface Transaction {
   hash: string
   from: `0x${string}`
+  fromEns?: string | null
   to: `0x${string}` | null
+  toEns?: string | null
   value: string // in wei
   valueFormatted: string // in ETH
   timestamp: number
